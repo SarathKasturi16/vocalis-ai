@@ -17,7 +17,7 @@ CONVERSATION:
 
 TOOLS:
 search_knowledge(question)
-create_lead(qualification)
+create_lead(qualification)~
 
 VOICE STYLE:
 Concise, professional, natural. Ask one question at a time.

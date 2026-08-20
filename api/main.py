@@ -1,3 +1,7 @@
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
 """FastAPI backend — RAG operations and Vapi webhooks."""
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
