@@ -1,0 +1,9 @@
+[
+    {"start": 0.0, "speaker": "Agent", "text": "Thank you for calling Vocalis AI, my name is Alex. How can I assist you today?"},
+    {"start": 3.5, "speaker": "Customer", "text": "Hi Alex, I'm calling to check the status of my auto loan application."},
+    {"start": 7.0, "speaker": "Agent", "text": "I can certainly help with that. Could you please provide your application number?"},
+    {"start": 10.0, "speaker": "Customer", "text": "Sure, it's 883920. I'm hoping to get this finalized soon because my wife and I are actually looking to buy a second vehicle for her next month."},
+    {"start": 17.5, "speaker": "Agent", "text": "Thank you. Let me pull up application 883920. Okay, I see it here. It looks like it is in the final underwriting stage."},
+    {"start": 23.0, "speaker": "Customer", "text": "Oh great. Do you know how much longer that usually takes?"},
+    {"start": 25.5, "speaker": "Agent", "text": "It typically takes about 24 to 48 hours to get the final decision. I'll make a note on your file to expedite it if possible."}
+]

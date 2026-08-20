@@ -1,0 +1,32 @@
+[
+  {
+    "record_id": "kb_sample_loan_policy_001",
+    "title": "",
+    "content": "AlphaBank Business Growth Loan - Official Policy 1. Qualification Requirements: - The minimum annual turnover required to qualify is $250,000. - The business must have been operating for at least 2 years. - The business owner must have a credit score of 680 or higher.",
+    "category": "product_policy",
+    "source": "data/raw/sample_loan_policy.txt",
+    "version": "1.0",
+    "pii": false,
+    "effective_date": "2026-08-01"
+  },
+  {
+    "record_id": "kb_sample_loan_policy_002",
+    "title": "",
+    "content": "2. Loan Terms & Pricing: - The maximum loan amount available is $75,000. - The interest rate is a fixed 7.5% APY. - The repayment term is exactly 36 months. - There is no early repayment penalty.",
+    "category": "pricing",
+    "source": "data/raw/sample_loan_policy.txt",
+    "version": "1.0",
+    "pii": false,
+    "effective_date": "2026-08-01"
+  },
+  {
+    "record_id": "kb_sample_loan_policy_003",
+    "title": "",
+    "content": "3. Required Documentation: To apply, the applicant must submit: - 2 years of business tax returns. - 6 months of business bank statements. - A valid state business license. - A scanned copy of a government-issued ID.",
+    "category": "product_policy",
+    "source": "data/raw/sample_loan_policy.txt",
+    "version": "1.0",
+    "pii": false,
+    "effective_date": "2026-08-01"
+  }
+]

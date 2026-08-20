@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+python-dotenv
+chromadb
+sentence-transformers
+spacy
+presidio-analyzer
+beautifulsoup4
+requests
+pytest
+google-genai>=1.0,<2

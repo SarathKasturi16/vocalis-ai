@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocalis AI</title>
+    <!-- Tailwind CSS for clean styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+    <style>
+        .vapi-btn {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            z-index: -9999 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col h-screen overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+                Vocalis AI
+            </h1>
+            <p class="text-xs text-gray-500">Unified Prototype - Text Search and Live Voice Agent</p>
+        </div>
+    </header>
+
+    <!-- Top Tabs (Navigation) -->
+    <div class="px-8 pt-4 bg-white border-b border-gray-200">
+        <div class="flex gap-6">
+            <button id="tab-kb" onclick="switchTab('kb-tab')" class="pb-3 border-b-2 border-blue-600 font-bold text-blue-600 text-sm transition focus:outline-none">
+                Knowledge Base
+            </button>
+            <button id="tab-text" onclick="switchTab('text-tab')" class="pb-3 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-800 text-sm transition focus:outline-none">
+                Q2: Text Search (RAG)
+            </button>
+            <button id="tab-voice" onclick="switchTab('voice-tab')" class="pb-3 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-800 text-sm transition focus:outline-none">
+                Q1: Voice Agent Call
+            </button>
+            <button id="tab-q3" onclick="switchTab('q3-tab')" class="pb-3 border-b-2 border-transparent font-semibold text-indigo-500 hover:text-indigo-800 text-sm transition focus:outline-none">
+                Q3: Native Bots
+            </button>
+            <button id="tab-q4" onclick="switchTab('q4-tab')" class="pb-3 border-b-2 border-transparent font-semibold text-purple-500 hover:text-purple-800 text-sm transition focus:outline-none">
+                Q4: Live Coach
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow p-8 overflow-y-auto">
+        
+        <!-- Tab 1: Knowledge Base Management -->
+        <div id="kb-tab" class="tab-content h-full max-w-4xl mx-auto flex flex-col gap-6">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- File Ingestion Card -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-3">
+                    <h3 class="font-bold text-gray-800 text-sm">File Ingestion</h3>
+                    <p class="text-xs text-gray-500">Upload loan policy documents (PDF, TXT, CSV, MD)</p>
+                    <input type="file" id="file-upload" multiple class="block w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                    <button id="upload-btn" onclick="handleUpload(event)" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-md text-xs font-semibold transition border border-gray-300">Upload Files</button>
+                </div>
+
+                <!-- Web Scraper Card -->
+                <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-3">
+                    <h3 class="font-bold text-gray-800 text-sm">Web Scraper</h3>
+                    <p class="text-xs text-gray-500">Enter a website URL to fetch and scrape loan rules</p>
+                    <input type="text" id="url-input" placeholder="https://example.com" class="w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-blue-500">
+                    <button onclick="fetchUrl()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded-md text-xs font-semibold transition border border-gray-300">Scrape URL</button>
+                </div>
+            </div>
+
+            <!-- Active Files List -->
+            <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm flex-grow flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-gray-800 text-sm">Current Documents</h3>
+                    <span id="files-count" class="text-xs bg-gray-100 px-2.5 py-1 rounded-md text-blue-600 font-bold border border-gray-200">0</span>
+                </div>
+                <div id="file-list" class="flex-grow min-h-[150px] overflow-y-auto space-y-1.5 text-xs text-gray-500">
+                    <p class="italic text-gray-400">No files uploaded.</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="text-xs text-gray-500">
+                    Server status: <span id="server-status" class="font-bold">checking...</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="clearData()" class="bg-white hover:bg-red-50 text-red-600 px-4 py-2 rounded-md font-semibold text-xs transition border border-red-200">Clear Database</button>
+                    <button id="build-btn" onclick="rebuildDatabase()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-md font-semibold text-xs transition shadow">Build Knowledge Base</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Q2: Text Search (RAG) -->
+        <div id="text-tab" class="tab-content hidden h-full max-w-4xl mx-auto flex flex-col justify-between">
+            <div id="search-results" class="flex-grow bg-white border border-gray-200 rounded-lg p-5 overflow-y-auto mb-4 flex flex-col gap-4 shadow-sm min-h-[400px]">
+                <div class="m-auto text-center text-gray-400">
+                    <p class="text-sm">Type a loan question below to query the database.</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <input type="text" id="search-query" placeholder="What is the minimum turnover required?" onkeypress="if(event.key === 'Enter') handleSearch(event)" class="flex-grow px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 shadow-sm text-sm">
+                <button id="search-btn" onclick="handleSearch(event)" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow transition text-sm">Ask Agent</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: Q1: Voice Agent Call -->
+        <div id="voice-tab" class="tab-content hidden h-full flex flex-col">
+            <div class="bg-white border border-gray-200 rounded-lg p-6 flex flex-col shadow-sm h-full max-w-4xl mx-auto w-full">
+                <div class="flex items-center justify-between border-b border-gray-200 pb-4 mb-4">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Interactive Call Console</h3>
+                        <p class="text-xs text-gray-500">Live Voice Agent Toolground Session</p>
+                    </div>
+                    <!-- Status Badge -->
+                    <span id="call-status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                        <span id="status-dot" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                        <span id="status-text">Disconnected</span>
+                    </span>
+                </div>
+
+                <!-- Visualizer Container -->
+                <div id="visualizer-box" class="flex-grow flex flex-col items-center justify-center border border-gray-100 rounded-lg bg-gray-50 p-6 relative overflow-hidden min-h-[300px]">
+                    <!-- Pulsing Glow (hidden by default) -->
+                    <div id="pulsing-wave" class="hidden absolute w-48 h-48 rounded-full bg-blue-500/10 animate-ping"></div>
+                    <div id="pulsing-glow" class="hidden absolute w-40 h-40 rounded-full bg-blue-500/20 blur-xl animate-pulse"></div>
+
+                    <!-- Custom Central Call/Hangup Button -->
+                    <button id="call-btn" onclick="toggleCall()" class="z-10 bg-emerald-500 hover:bg-emerald-400 w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none">
+                        <!-- Custom SVG Call Icon -->
+                        <svg id="call-icon" class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
+                    </button>
+                    
+                    <p id="voice-instruction" class="text-sm font-semibold text-gray-500 mt-4 z-10 text-center max-w-sm">
+                        Click the button above to start the voice session.
+                    </p>
+                </div>
+
+                <!-- Call Log / Live transcript -->
+                <div class="mt-4 border-t border-gray-200 pt-4 flex flex-col gap-2">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Live Transcript</h4>
+                    <div id="voice-chat-history" class="h-32 overflow-y-auto space-y-2 pr-1 text-sm bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+                        <p class="italic text-gray-400 text-xs">Waiting for speech...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    
+        <!-- ================= Q3 TAB ================= -->
+        <div id="q3-tab" class="tab-content hidden h-[calc(100vh-140px)] flex items-center justify-center bg-gray-50/50">
+            <div class="max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 p-8 h-full">
+                
+                <!-- Bots Selection Area -->
+                <div class="flex flex-col gap-6 justify-center">
+                    
+                    <!-- PH Bot Card -->
+                    <div class="bg-white p-6 rounded-xl border border-indigo-100 shadow-sm flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl mb-4">🇵🇭</div>
+                        <h4 class="font-bold text-gray-800 mb-2">Philippines Bot</h4>
+                        <p class="text-xs text-gray-500 mb-6">Life Insurance • Taglish • Bancassurance</p>
+                        
+                        <button id="q3-ph-btn" onclick="toggleCall('ph')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none">
+                            Start Call
+                        </button>
+                    </div>
+
+                    <!-- ID Bot Card -->
+                    <div class="bg-white p-6 rounded-xl border border-indigo-100 shadow-sm flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl mb-4">🇮🇩</div>
+                        <h4 class="font-bold text-gray-800 mb-2">Indonesia Bot</h4>
+                        <p class="text-xs text-gray-500 mb-6">Multifinance • Bahasa Indonesia • Loanwords</p>
+                        
+                        <button id="q3-id-btn" onclick="toggleCall('id')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none">
+                            Start Call
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Call Interface Area -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 flex flex-col relative">
+                    <!-- Status Header -->
+                    <div class="bg-gray-50 border-b border-gray-100 p-4 flex justify-between items-center z-10">
+                        <div class="flex items-center gap-3">
+                            <span id="q3-call-status" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                <span id="q3-status-dot" class="w-2 h-2 rounded-full bg-gray-400"></span>
+                                <span id="q3-status-text">Disconnected</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Main Call Visual Area -->
+                    <div class="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gradient-to-b from-gray-50 to-white">
+                        
+                        <!-- Pulsing Animations -->
+                        <div id="q3-pulsing-glow" class="absolute inset-0 bg-indigo-500/5 hidden blur-3xl animate-pulse"></div>
+                        
+                        <!-- Call Controls -->
+                        <div class="relative w-48 h-48 flex items-center justify-center mb-8">
+                            <div id="q3-pulsing-wave" class="absolute inset-0 rounded-full border-4 border-indigo-500/20 hidden animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                            
+                            <button id="q3-call-btn" onclick="toggleCall('stop')" class="hidden z-10 bg-red-600 hover:bg-red-500 w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <p id="q3-voice-instruction" class="text-sm font-medium text-gray-500 text-center z-10">
+                            Select a bot to start a call.
+                        </p>
+                    </div>
+
+                    <!-- Transcript Area -->
+                    <div class="h-1/3 bg-gray-50 border-t border-gray-100 flex flex-col">
+                        <div class="p-3 text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200">
+                            Live Transcript
+                        </div>
+                        <div id="q3-voice-chat-history" class="flex-1 p-4 overflow-y-auto bg-gray-50/50 font-mono text-sm">
+                            <div class="text-center text-gray-400 italic text-xs mt-4">Transcript will appear here...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    
+        <!-- ================= Q4 TAB ================= -->
+        <div id="q4-tab" class="tab-content hidden h-[calc(100vh-140px)] bg-gray-50/50 flex flex-col items-center">
+            <div class="max-w-7xl w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 p-6 h-full">
+                
+                <!-- Controls Sidebar -->
+                <div class="col-span-1 flex flex-col gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-purple-100 p-5">
+                        <h3 class="font-bold text-purple-900 mb-2">Simulate Live Call</h3>
+                        <p class="text-xs text-gray-500 mb-4">Select a pre-recorded scenario. The audio is replayed in real-time chunks through the pipeline.</p>
+                        
+                        <div class="space-y-3">
+                            <button onclick="startQ4Stream('1')" class="w-full text-left bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-medium py-2 px-4 rounded-lg transition text-sm flex justify-between items-center">
+                                <span>Scenario 1: Missed Cross-Sell</span>
+                                <span class="text-xs bg-purple-200 px-2 py-1 rounded-full">Play</span>
+                            </button>
+                            <button onclick="startQ4Stream('2')" class="w-full text-left bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-medium py-2 px-4 rounded-lg transition text-sm flex justify-between items-center">
+                                <span>Scenario 2: Compliance Gap</span>
+                                <span class="text-xs bg-purple-200 px-2 py-1 rounded-full">Play</span>
+                            </button>
+                            <button onclick="startQ4Stream('3')" class="w-full text-left bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 font-medium py-2 px-4 rounded-lg transition text-sm flex justify-between items-center">
+                                <span>Scenario 3: Frustration</span>
+                                <span class="text-xs bg-purple-200 px-2 py-1 rounded-full">Play</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Latency Metrics -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex-1">
+                        <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wider">Live Telemetry</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>ASR Latency (Simulated)</span>
+                                    <span id="q4-asr-lat" class="font-mono">-- ms</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-1.5"><div id="q4-asr-bar" class="bg-blue-400 h-1.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>LLM Signal/Nudge Extraction</span>
+                                    <span id="q4-llm-lat" class="font-mono">-- ms</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-1.5"><div id="q4-llm-bar" class="bg-orange-400 h-1.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+
+                            <div class="pt-2 border-t border-gray-100">
+                                <div class="flex justify-between text-xs font-bold text-gray-700">
+                                    <span>End-to-End P95 Latency</span>
+                                    <span id="q4-e2e-lat" class="font-mono text-purple-600">-- ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Transcription & Nudges -->
+                <div class="col-span-2 flex flex-col gap-4">
+                    <!-- Live Coach Dashboard -->
+                    <div class="bg-purple-900 rounded-xl shadow-lg border border-purple-800 p-5 h-48 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        </div>
+                        <h3 class="font-bold text-purple-100 mb-2 flex items-center gap-2">
+                            <div id="q4-pulse" class="w-2 h-2 bg-purple-400 rounded-full"></div>
+                            AI Co-Pilot Nudges
+                        </h3>
+                        <div id="q4-nudges" class="flex-1 overflow-y-auto space-y-2 z-10 flex flex-col justify-end">
+                            <div class="text-purple-300/50 text-sm italic text-center">Monitoring call for actionable insights...</div>
+                        </div>
+                    </div>
+
+                    <!-- Transcript -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
+                        <div class="bg-gray-50 border-b border-gray-200 px-4 py-2 flex justify-between items-center">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Live Streaming Transcript</span>
+                            <span id="q4-stream-status" class="text-xs font-mono bg-gray-200 text-gray-600 px-2 py-0.5 rounded">IDLE</span>
+                        </div>
+                        <div id="q4-transcript" class="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-sm bg-slate-50">
+                            <!-- lines go here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+    <!-- Status Alerts -->
+    <div id="toast" class="fixed bottom-6 left-6 bg-slate-900 text-white px-5 py-3 rounded-lg shadow-xl font-semibold hidden z-50 transition-all border border-slate-800"></div>
+
+    <script>
+        const BASE_URL = 'http://localhost:8000';
+        
+        const CONFIG = {
+            vapiPublicKey: "200fc590-2467-4ae6-ad7e-a6fa356b9f24",
+            q3PublicKey: "200fc590-2467-4ae6-ad7e-a6fa356b9f24",
+            vapiAssistantId: "ff0aa563-f56e-489a-b8cf-20fcb4bbc7b5",
+            phAssistantId: "df0d79ea-81df-4687-84bf-c6697b4ff739",
+            idAssistantId: "0f394da3-8983-4792-9bde-9f839026f92e"
+        };
+
+        let currentActiveBot = 'default';
+        let currentVapiKey = null;
+        let isCallActive = false;
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            const tabKb = document.getElementById('tab-kb');
+            const tabText = document.getElementById('tab-text');
+            const tabVoice = document.getElementById('tab-voice');
+            const tabQ3 = document.getElementById('tab-q3');
+            const tabQ4 = document.getElementById('tab-q4');
+
+            [tabKb, tabText, tabVoice, tabQ3, tabQ4].forEach(t => {
+                if(t) t.className = "pb-3 border-b-2 border-transparent font-semibold text-gray-500 hover:text-gray-800 text-sm transition focus:outline-none";
+            });
+
+            let activeTabBtn;
+            if (tabId === 'kb-tab') activeTabBtn = tabKb;
+            if (tabId === 'text-tab') activeTabBtn = tabText;
+            if (tabId === 'voice-tab') activeTabBtn = tabVoice;
+            if (tabId === 'q3-tab') activeTabBtn = tabQ3;
+            if (tabId === 'q4-tab') activeTabBtn = tabQ4;
+            
+            if (activeTabBtn) {
+                const color = tabId === 'q4-tab' ? 'purple' : (tabId === 'q3-tab' ? 'indigo' : 'blue');
+                activeTabBtn.className = `pb-3 border-b-2 border-${color}-600 font-bold text-${color}-600 text-sm transition focus:outline-none`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function checkServer() {
+            try {
+                const res = await fetch(BASE_URL + '/api/health');
+                if (res.ok) {
+                    document.getElementById('server-status').innerText = 'Online';
+                    document.getElementById('server-status').className = 'text-emerald-500 font-bold ml-1';
+                }
+            } catch (e) {
+                document.getElementById('server-status').innerText = 'Offline';
+                document.getElementById('server-status').className = 'text-red-500 font-bold ml-1';
+            }
+        }
+
+        async function loadFilesList() {
+            try {
+                const res = await fetch(BASE_URL + '/api/files');
+                const data = await res.json();
+                const list = document.getElementById('file-list');
+                const count = document.getElementById('files-count');
+                
+                count.innerText = data.files.length;
+                if (data.files.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 italic text-sm">No files ingested yet.</p>';
+                    return;
+                }
+                
+                list.innerHTML = '<ul class="space-y-1">' + data.files.map(f => 
+                    `<li class="flex items-center gap-2 text-sm text-gray-700">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        ${escapeHtml(f.filename)} <span class="text-xs text-gray-400">(${new Date(f.ingested_at).toLocaleDateString()})</span>
+                    </li>`
+                ).join('') + '</ul>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file-upload');
+            const file = fileInput.files[0];
+            if (!file) return alert("Select a file first.");
+
+            const formData = new FormData();
+            for (let i=0; i<fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+
+            const btn = document.getElementById('upload-btn');
+            btn.disabled = true;
+            btn.innerText = 'Uploading...';
+
+            try {
+                const res = await fetch(BASE_URL + '/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                showToast("File uploaded and ingested successfully!", "success");
+                fileInput.value = '';
+                loadFilesList();
+            } catch (err) {
+                alert("Upload failed.");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Upload File';
+            }
+        }
+
+        async function handleScrape(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('url-input');
+            const url = urlInput.value.trim();
+            if (!url) return alert("Enter a URL.");
+
+            const btn = document.getElementById('scrape-btn');
+            btn.disabled = true;
+            btn.innerText = 'Scraping...';
+
+            try {
+                const res = await fetch(BASE_URL + '/api/ingest/url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ url })
+                });
+                const data = await res.json();
+                showToast("URL scraped and ingested successfully!", "success");
+                urlInput.value = '';
+                loadFilesList();
+            } catch (err) {
+                alert("Scrape failed.");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Scrape URL';
+            }
+        }
+
+        async function clearDatabase() {
+            if(!confirm("Are you sure you want to clear the entire knowledge base?")) return;
+            
+            try {
+                await fetch(BASE_URL + '/api/clear', { method: 'POST' });
+                showToast("Knowledge base cleared.", "info");
+                loadFilesList();
+            } catch (e) {
+                alert("Failed to clear database.");
+            }
+        }
+
+        async function rebuildDatabase() {
+            const btn = document.getElementById('build-btn');
+            btn.disabled = true;
+            btn.innerText = 'Building...';
+            try {
+                await fetch(BASE_URL + '/api/build', { method: 'POST' });
+                showToast("Knowledge base rebuilt from scratch.", "success");
+                loadFilesList();
+            } catch (e) {
+                alert("Failed to rebuild.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Rebuild KB';
+            }
+        }
+
+        async function handleSearch(e) {
+            e.preventDefault();
+            const query = document.getElementById('search-query').value.trim();
+            if (!query) return;
+
+            const btn = document.getElementById('search-btn');
+            const resultsDiv = document.getElementById('search-results');
+            
+            btn.disabled = true;
+            btn.innerText = 'Searching...';
+            resultsDiv.innerHTML = '<div class="text-center text-gray-500 py-8 animate-pulse">Analyzing documents...</div>';
+
+            try {
+                const res = await fetch(BASE_URL + '/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ question: query })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || "Server returned an error");
+                }
+                
+                let html = `
+                    <div class="mb-6 p-5 bg-indigo-50 border border-indigo-100 rounded-xl">
+                        <h3 class="text-sm font-bold text-indigo-900 mb-2 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                            AI Synthesis
+                        </h3>
+                        <div class="text-sm text-gray-800 leading-relaxed prose prose-sm max-w-none">
+                            ${data.answer.replace(/\n/g, '<br/>')}
+                        </div>
+                    </div>
+                `;
+
+                if (data.sources && data.sources.length > 0) {
+                    html += '<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Source Documents</h4><div class="grid grid-cols-1 gap-3">';
+                    data.sources.forEach((src, idx) => {
+                        html += `
+                            <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs font-bold border border-gray-200">#${idx+1}</span>
+                                    <span class="text-sm font-semibold text-gray-700 truncate" title="${escapeHtml(src.source)}">${escapeHtml(src.source)}</span>
+                                    <span class="ml-auto text-xs font-medium text-gray-400 bg-gray-50 px-2 rounded-full border border-gray-100">Score: ${src.score.toFixed(3)}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 line-clamp-3 italic bg-gray-50/50 p-2 rounded">"${escapeHtml(src.content)}"</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (e) {
+                console.error(e);
+                resultsDiv.innerHTML = `<div class="text-red-500 p-4 bg-red-50 rounded-lg border border-red-100">Search failed: ${e.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Ask AI';
+            }
+        }
+
+        async function createLead(e) {
+            e.preventDefault();
+            const name = document.getElementById('lead-name').value;
+            const phone = document.getElementById('lead-phone').value;
+            const context = document.getElementById('lead-context').value;
+            
+            const btn = document.getElementById('lead-btn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            try {
+                const res = await fetch(BASE_URL + '/api/leads', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, phone, context })
+                });
+                
+                if (res.ok) {
+                    showToast("Test lead injected successfully!", "success");
+                    e.target.reset();
+                }
+            } catch (err) {
+                alert("Failed to create lead.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Inject Lead';
+            }
+        }
+
+        
+        // --- Q4 LIVE COACH LOGIC ---
+        let q4EventSource = null;
+        let q4E2eHistory = [];
+
+        function startQ4Stream(scenarioId) {
+            if (q4EventSource) {
+                q4EventSource.close();
+            }
+            
+            const transcriptBox = document.getElementById('q4-transcript');
+            const nudgesBox = document.getElementById('q4-nudges');
+            transcriptBox.innerHTML = '';
+            nudgesBox.innerHTML = '<div class="text-purple-300/50 text-sm italic text-center">Monitoring call for actionable insights...</div>';
+            q4E2eHistory = [];
+            
+            document.getElementById('q4-stream-status').innerText = 'STREAMING';
+            document.getElementById('q4-stream-status').className = 'text-xs font-mono bg-green-200 text-green-800 px-2 py-0.5 rounded animate-pulse';
+            document.getElementById('q4-pulse').classList.add('animate-ping', 'bg-green-400');
+
+            const sessionId = Math.random().toString(36).substring(7);
+            q4EventSource = new EventSource(BASE_URL + `/api/q4/stream?scenario=${scenarioId}&session=${sessionId}`);
+            
+            q4EventSource.onmessage = (event) => {
+                if (event.data === '[DONE]') {
+                    q4EventSource.close();
+                    document.getElementById('q4-stream-status').innerText = 'ENDED';
+                    document.getElementById('q4-stream-status').className = 'text-xs font-mono bg-gray-200 text-gray-600 px-2 py-0.5 rounded';
+                    document.getElementById('q4-pulse').classList.remove('animate-ping', 'bg-green-400');
+                    return;
+                }
+                
+                try {
+                    const data = JSON.parse(event.data);
+                    if(data.error) {
+                        alert(data.error);
+                        q4EventSource.close();
+                        return;
+                    }
+                    
+                    // Render Transcript
+                    const isAgent = data.speaker === 'Agent';
+                    const bubble = document.createElement('div');
+                    bubble.className = `p-3 rounded-lg max-w-[85%] ${isAgent ? 'bg-blue-100 text-blue-900 self-start border border-blue-200' : 'bg-white border border-gray-200 text-gray-800 self-end ml-auto'}`;
+                    bubble.innerHTML = `<span class="text-xs font-bold block mb-1 opacity-50">${data.speaker}</span>${escapeHtml(data.transcript)}`;
+                    transcriptBox.appendChild(bubble);
+                    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+                    
+                    // Update Latency
+                    document.getElementById('q4-asr-lat').innerText = data.asr_latency_ms + ' ms';
+                    document.getElementById('q4-llm-lat').innerText = data.llm_latency_ms + ' ms';
+                    document.getElementById('q4-asr-bar').style.width = Math.min((data.asr_latency_ms / 500) * 100, 100) + '%';
+                    document.getElementById('q4-llm-bar').style.width = Math.min((data.llm_latency_ms / 1500) * 100, 100) + '%';
+                    
+                    q4E2eHistory.push(data.e2e_latency_ms);
+                    const sorted = [...q4E2eHistory].sort((a,b) => a-b);
+                    const p95 = sorted[Math.floor(sorted.length * 0.95)] || 0;
+                    document.getElementById('q4-e2e-lat').innerText = p95 + ' ms';
+
+                    // Render Nudge if present
+                    if (data.nudge) {
+                        const nudgePlaceholder = nudgesBox.querySelector('.italic');
+                        if (nudgePlaceholder) nudgePlaceholder.remove();
+                        
+                        let colorClass = "bg-purple-100 text-purple-900 border-purple-300";
+                        if (data.nudge.type === 'frustration') colorClass = "bg-red-100 text-red-900 border-red-300";
+                        if (data.nudge.type === 'compliance_gap') colorClass = "bg-orange-100 text-orange-900 border-orange-300";
+                        if (data.nudge.type === 'missed_cross_sell') colorClass = "bg-green-100 text-green-900 border-green-300";
+
+                        const nudgeDiv = document.createElement('div');
+                        nudgeDiv.className = `p-3 rounded-lg border-l-4 shadow-sm animate-bounce ${colorClass}`;
+                        nudgeDiv.innerHTML = `
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold uppercase tracking-wider opacity-70">${data.nudge.type.replace(/_/g, ' ')}</span>
+                                <span class="text-[10px] bg-white/50 px-2 rounded-full font-mono">Conf: ${(data.nudge.confidence * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="font-medium text-sm">${escapeHtml(data.nudge.text)}</div>
+                        `;
+                        nudgesBox.appendChild(nudgeDiv);
+                        nudgesBox.scrollTop = nudgesBox.scrollHeight;
+                    }
+                    
+                } catch(e) {
+                    console.error("Error parsing Q4 stream:", e);
+                }
+            };
+            
+            q4EventSource.onerror = (err) => {
+                console.error("SSE Error", err);
+                q4EventSource.close();
+            };
+        }
+
+        // --- VAPI SPECIFIC LOGIC ---
+
+        function attachVapiListeners() {
+            window.vapiInstance.on('call-start', () => {
+                updateVoiceUI('active');
+            });
+
+            window.vapiInstance.on('call-end', () => {
+                updateVoiceUI('disconnected');
+            });
+
+            window.vapiInstance.on('connecting', () => {
+                updateVoiceUI('connecting');
+            });
+
+            window.vapiInstance.on('error', (err) => {
+                console.error("Vapi Error:", err);
+                updateVoiceUI('disconnected');
+                let errMsg = err.message || err;
+                if (typeof err === 'object') {
+                    try { errMsg = JSON.stringify(err); } catch(e) {}
+                }
+                alert("Call error: " + errMsg);
+            });
+
+            window.vapiInstance.on('message', (message) => {
+                if (message.type === 'transcript' && message.transcriptType === 'final') {
+                    const isQ3 = (currentActiveBot === 'ph' || currentActiveBot === 'id');
+                    const msgClass = (message.role === 'user') ? 'items-end' : 'items-start';
+                    const bubbleClass = (message.role === 'user') ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none';
+                    
+                    const html = `
+                        <div class="flex flex-col mb-2 ${msgClass}">
+                            <div class="px-3 py-1.5 rounded-lg max-w-sm text-xs ${bubbleClass} shadow-sm">
+                                ${message.transcript}
+                            </div>
+                        </div>
+                    `;
+                    
+                    const chatBox = document.getElementById(isQ3 ? 'q3-voice-chat-history' : 'voice-chat-history');
+                    if(chatBox) {
+                        const placeholder = chatBox.querySelector('.italic');
+                        if (placeholder) placeholder.remove();
+                        chatBox.innerHTML += html;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                }
+            });
+        }
+
+        async function initVapi(publicKey, assistantId) {
+            return new Promise((resolve) => {
+                if (window.vapiInstance && currentVapiKey === publicKey) {
+                    resolve(false);
+                    return;
+                }
+
+                const existingBtn = document.querySelector('.vapi-btn');
+                if (existingBtn) existingBtn.remove();
+                
+                const startSDK = () => {
+                    window.vapiInstance = window.vapiSDK.run({
+                        apiKey: publicKey,
+                        assistant: assistantId,
+                        config: {}
+                    });
+                    
+                    setTimeout(() => {
+                        const btn = document.querySelector('.vapi-btn');
+                        if (btn) btn.style.display = 'none';
+                    }, 100);
+
+                    attachVapiListeners();
+                    currentVapiKey = publicKey;
+                    resolve(true);
+                };
+                
+                if (window.vapiSDK) {
+                    startSDK();
+                } else {
+                    alert('Vapi SDK failed to load. Please refresh.');
+                    resolve(false);
+                }
+            });
+        }
+
+        async function toggleCall(assistantType = 'default') {
+            const statText = document.getElementById('status-text');
+            const q3StatText = document.getElementById('q3-status-text');
+            const isConnecting = (statText && statText.innerText === 'Connecting...') || (q3StatText && q3StatText.innerText === 'Connecting...');
+            
+            if (isCallActive || isConnecting || assistantType === 'stop') {
+                updateVoiceUI('disconnected');
+                if (window.vapiInstance) window.vapiInstance.stop();
+                return;
+            }
+            
+            currentActiveBot = assistantType;
+            let targetId = CONFIG.vapiAssistantId;
+            let targetKey = CONFIG.vapiPublicKey;
+            
+            if (assistantType === 'ph') {
+                targetId = CONFIG.phAssistantId;
+                targetKey = CONFIG.q3PublicKey;
+            }
+            if (assistantType === 'id') {
+                targetId = CONFIG.idAssistantId;
+                targetKey = CONFIG.q3PublicKey;
+            }
+            
+            if (!targetId) {
+                return alert("Assistant ID not configured for " + assistantType + " bot.");
+            }
+
+            updateVoiceUI('connecting');
+            
+            await initVapi(targetKey, targetId);
+            window.vapiInstance.start(targetId);
+        }
+
+        function updateVoiceUI(state) {
+            const isQ3 = (currentActiveBot === 'ph' || currentActiveBot === 'id');
+            const badge = document.getElementById(isQ3 ? 'q3-call-status' : 'call-status');
+            const dot = document.getElementById(isQ3 ? 'q3-status-dot' : 'status-dot');
+            const txt = document.getElementById(isQ3 ? 'q3-status-text' : 'status-text');
+            const pulseGlow = document.getElementById(isQ3 ? 'q3-pulsing-glow' : 'pulsing-glow');
+            const pulseWave = document.getElementById(isQ3 ? 'q3-pulsing-wave' : 'pulsing-wave');
+            const instr = document.getElementById(isQ3 ? 'q3-voice-instruction' : 'voice-instruction');
+            const callBtn = document.getElementById(isQ3 ? 'q3-call-btn' : 'call-btn');
+
+            if (!badge) return;
+
+            if (state === 'connecting') {
+                txt.innerText = 'Connecting...';
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700";
+                dot.className = "w-2 h-2 rounded-full bg-yellow-500 animate-pulse";
+                
+                pulseGlow.classList.remove('hidden');
+                pulseWave.classList.remove('hidden');
+                
+                callBtn.classList.remove('hidden');
+                callBtn.className = "z-10 bg-yellow-500 w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition opacity-50 cursor-not-allowed";
+                callBtn.disabled = true;
+
+                instr.innerText = "Opening microphone channel...";
+
+            } else if (state === 'active') {
+                isCallActive = true;
+                txt.innerText = 'Call Active';
+                
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700";
+                dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+
+                pulseGlow.classList.remove('hidden');
+                pulseWave.classList.remove('hidden');
+
+                callBtn.className = "z-10 bg-red-500 hover:bg-red-400 w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none";
+                callBtn.disabled = false;
+                
+                if(!isQ3) {
+                    const icon = document.getElementById('call-icon');
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>'; 
+                } else {
+                    callBtn.classList.remove('hidden');
+                    callBtn.className = "z-10 bg-red-500 hover:bg-red-400 w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none";
+                }
+
+                instr.innerText = "Click to hang up the call.";
+
+            } else {
+                isCallActive = false;
+                txt.innerText = 'Disconnected';
+                
+                badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600";
+                dot.className = "w-2 h-2 rounded-full bg-gray-400";
+                
+                pulseGlow.classList.add('hidden');
+                pulseWave.classList.add('hidden');
+
+                callBtn.className = "z-10 bg-emerald-500 hover:bg-emerald-400 w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition transform hover:scale-105 active:scale-95 focus:outline-none";
+                callBtn.disabled = false;
+
+                if(!isQ3) {
+                    const icon = document.getElementById('call-icon');
+                    if(icon) icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>';
+                } else {
+                    callBtn.classList.add('hidden');
+                }
+                
+                instr.innerText = isQ3 ? "Select a bot above to start a call." : "Click the button above to start the voice session.";
+            }
+        }
+
+        window.onload = async function() {
+            await checkServer();
+            await loadFilesList();
+        };
+    </script>
+</body>
+</html>

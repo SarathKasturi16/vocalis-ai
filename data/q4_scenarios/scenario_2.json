@@ -1,0 +1,9 @@
+[
+    {"start": 0.0, "speaker": "Agent", "text": "Hello, you've reached Vocalis AI collections. This is Sarah."},
+    {"start": 3.0, "speaker": "Customer", "text": "Hi Sarah, I'm calling about the notice I received regarding my missed payment."},
+    {"start": 6.5, "speaker": "Agent", "text": "I see. Let me pull up your account. Can you verify your zip code for me?"},
+    {"start": 10.0, "speaker": "Customer", "text": "It's 90210."},
+    {"start": 12.0, "speaker": "Agent", "text": "Thank you. I see your account is 15 days past due. Are you able to make a payment today?"},
+    {"start": 16.5, "speaker": "Customer", "text": "Not today, I get paid next Friday. Can I set up a payment arrangement?"},
+    {"start": 21.0, "speaker": "Agent", "text": "Sure, we can schedule a payment for next Friday. Let me set that up for you right now."}
+]

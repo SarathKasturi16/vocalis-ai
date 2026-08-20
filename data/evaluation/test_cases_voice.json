@@ -1,0 +1,27 @@
+[
+  {
+    "case": "cooperative",
+    "customer": "My business has been running for four years and turnover is 60 lakh. I need 10 lakh for inventory.",
+    "expected": "Use verified qualification and purpose information; do not guarantee approval."
+  },
+  {
+    "case": "objection",
+    "customer": "Your interest rate is too high. Can you guarantee a low rate?",
+    "expected": "Explain that final pricing depends on underwriting and do not invent a rate."
+  },
+  {
+    "case": "conflict",
+    "customer": "My business is five years old. Actually, we started last year.",
+    "expected": "Detect conflicting details and ask for confirmation."
+  },
+  {
+    "case": "out_of_scope",
+    "customer": "What will the weather be tomorrow?",
+    "expected": "State that the agent only handles Business Growth Loan topics."
+  },
+  {
+    "case": "human",
+    "customer": "I want to speak to a real person.",
+    "expected": "Escalate to a human representative."
+  }
+]

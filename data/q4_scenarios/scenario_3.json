@@ -1,0 +1,9 @@
+[
+    {"start": 0.0, "speaker": "Agent", "text": "Thank you for calling support. How can I help?"},
+    {"start": 2.5, "speaker": "Customer", "text": "Hi, I've been trying to reset my password on your portal for three days and the link never arrives!"},
+    {"start": 7.0, "speaker": "Agent", "text": "I can help with that. Have you checked your spam folder?"},
+    {"start": 10.0, "speaker": "Customer", "text": "Of course I checked my spam folder! I already told the last rep that I checked it. This is ridiculous!"},
+    {"start": 15.5, "speaker": "Agent", "text": "Let me send it one more time right now."},
+    {"start": 17.5, "speaker": "Customer", "text": "Sending it again isn't going to magically fix it if it hasn't worked the last five times! I need someone to actually look into my account and fix the email on file!"},
+    {"start": 25.0, "speaker": "Agent", "text": "Okay, please hold while I check your account settings."}
+]
